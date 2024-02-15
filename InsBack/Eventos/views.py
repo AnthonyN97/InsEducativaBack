@@ -16,12 +16,12 @@ class EventosView(APIView):
         serEventos = EventoSerializer(dataEventos,many=True)
         return Response(serEventos.data)
     
-    def post(self,request):
+    """def post(self,request):
         serEventos = EventoSerializer(data=request.data)
         serEventos.is_valid(raise_exception=True)
         serEventos.save()
         
-        return Response(serEventos.data)
+        return Response(serEventos.data)"""
     
 class EventoDetailView(APIView):
     def get(self,request,Evento_id):
@@ -29,7 +29,7 @@ class EventoDetailView(APIView):
         serEvento = EventoSerializer(dataEvento)
         return Response(serEvento.data)
     
-    def put(self,request,Evento_id):
+    """def put(self,request,Evento_id):
         dataEvento = Eventos.objects.get(pk=Evento_id)
         serEvento = EventoSerializer(dataEvento,data=request.data)
         serEvento.is_valid(raise_exception=True)
@@ -40,4 +40,4 @@ class EventoDetailView(APIView):
         dataEvento = Eventos.objects.get(pk=Evento_id)
         serEvento = EventoSerializer(dataEvento)
         dataEvento.delete()
-        return Response(serEvento.data)
+        return Response(serEvento.data)"""
