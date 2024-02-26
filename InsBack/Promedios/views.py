@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import viewsets
 
@@ -55,10 +56,20 @@ class EstudianteView(APIView):
         serEstudiante.save()
         return Response(serEstudiante.data)
     
-class CursoViewSet(viewsets.ModelViewSet):
-    queryset = Curso.objects.all()
-    serializer_class = CursoSerializer
-
-class NotaViewSet(viewsets.ModelViewSet):
-    queryset = Nota.objects.all()
-    serializer_class = NotaSerializer
+class CursoView(APIView):
+    def get(self, request):
+        dataCurso = Curso.objects.all()
+        serCurso = CursoSerializer(dataCurso,many=True)
+        return Response(serCurso.data)
+    
+class NotaView(APIView):
+    def get(self, request):
+        dataNota = Nota.objects.all()
+        serNota = NotaSerializer(dataNota,many=True)
+        return Response(serNota.data)
+    
+class PromedioView(APIView):
+    def get(self, request):
+        dataPromedio = Promedio.objects.all()
+        serPromedio = PromedioSerializer(dataPromedio,many=True)
+        return Response(serPromedio.data)
