@@ -68,6 +68,13 @@ class NotaView(APIView):
         serNota = NotaSerializer(dataNota,many=True)
         return Response(serNota.data)
     
+class NotasAlumView(APIView):
+    def get(self, request, id):
+        estudiante = Estudiante.objects.get(id=id)
+        dataNota = Nota.objects.filter(estudiante=estudiante)
+        serNota = NotaSerializer(dataNota,many=True)
+        return Response(serNota.data)
+    
 class PromedioView(APIView):
     def get(self, request):
         dataPromedio = Promedio.objects.all()
