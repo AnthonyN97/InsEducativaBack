@@ -14,7 +14,7 @@ class CursoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Curso
-        fields = ('nombre', 'estudiantes')
+        fields = ('id','nombre', 'estudiantes')
     
     def get_estudiantes(self, obj):
         estudiantes = obj.estudiantes.all().distinct()

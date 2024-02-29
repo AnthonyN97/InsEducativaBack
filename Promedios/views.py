@@ -88,6 +88,25 @@ class CursoView(APIView):
         serCurso.save()
         return Response(serCurso.data)
     
+class CursoDetailView(APIView):
+    def get(self, request, id_curso):
+        dataCurso = Curso.objects.filter(id=id_curso)
+        serCurso = CursoSerializer(dataCurso,many=True)
+        return Response(serCurso.data)
+    
+    def put(self,request,id_curso):
+        dataCurso = Curso.objects.get(pk=id_curso)
+        serCurso = CursoSerializer(dataCurso,data=request.data)
+        serCurso.is_valid(raise_exception=True)
+        serCurso.save()
+        return Response(serCurso.data)
+    
+    def delete(self,request,id_curso):
+        dataCurso = Curso.objects.get(pk=id_curso)
+        serCurso = CursoSerializer(dataCurso)
+        dataCurso.delete()
+        return Response({"message": "Se elimno correctamente"})
+    
 class NotaView(APIView):
     def get(self, request):
         dataNota = Nota.objects.all()
