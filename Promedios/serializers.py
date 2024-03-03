@@ -14,11 +14,12 @@ class CursoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Curso
-        fields = ('id','nombre', 'estudiantes')
+        fields = ('id','nombre', 'estudiantes' )
     
     def get_estudiantes(self, obj):
         estudiantes = obj.estudiantes.all().distinct()
-        return [estudiante.nombre for estudiante in estudiantes]
+        return [{'id': estudiante.id, 'nombre': estudiante.nombre} for estudiante in estudiantes]
+
 
 class CursoPostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,17 +33,21 @@ class CursoPostSerializer(serializers.ModelSerializer):
 class NotaSerializer(serializers.ModelSerializer):
     estudiante_id = serializers.SerializerMethodField()
     estudiante = serializers.SerializerMethodField()
+    curso_id = serializers.SerializerMethodField()
     curso = serializers.SerializerMethodField()
 
     class Meta:
         model = Nota
-        fields = ('id','estudiante_id', 'estudiante', 'curso' , 'nota', 'porcentaje')
+        fields = ('id','estudiante_id', 'estudiante', 'curso_id','curso' , 'nota', 'porcentaje')
 
     def get_estudiante_id(self, obj):
         return obj.estudiante.id
 
     def get_estudiante(self, obj):
         return obj.estudiante.nombre
+    
+    def get_curso_id(self, obj):
+        return obj.curso.id
     
     def get_curso(self, obj):
         return obj.curso.nombre

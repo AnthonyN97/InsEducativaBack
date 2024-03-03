@@ -10,39 +10,6 @@ class IndexView(APIView):
     def get(self,request):
         context = {'mensaje':'servidor activo'}
         return Response(context)
-    
-"""class EventosView(APIView):
-    
-    def get(self,request):
-        dataEventos = Eventos.objects.all()
-        serEventos = EventoSerializer(dataEventos,many=True)
-        return Response(serEventos.data)
-    
-    def post(self,request):
-        serEventos = EventoSerializer(data=request.data)
-        serEventos.is_valid(raise_exception=True)
-        serEventos.save()
-        
-        return Response(serEventos.data)
-    
-class EventoDetailView(APIView):
-    def get(self,request,Evento_id):
-        dataEvento = Eventos.objects.get(pk=Evento_id)
-        serEvento = EventoSerializer(dataEvento)
-        return Response(serEvento.data)
-    
-    def put(self,request,Evento_id):
-        dataEvento = Eventos.objects.get(pk=Evento_id)
-        serEvento = EventoSerializer(dataEvento,data=request.data)
-        serEvento.is_valid(raise_exception=True)
-        serEvento.save()
-        return Response(serEvento.data)
-    
-    def delete(self,request,Evento_id):
-        dataEvento = Eventos.objects.get(pk=Evento_id)
-        serEvento = EventoSerializer(dataEvento)
-        dataEvento.delete()
-        return Response(serEvento.data)"""
 
 class EstudianteView(APIView):
     def get(self, request):
@@ -96,8 +63,9 @@ class CursoDetailView(APIView):
     
     def put(self,request,id_curso):
         dataCurso = Curso.objects.get(pk=id_curso)
-        serCurso = CursoSerializer(dataCurso,data=request.data)
+        serCurso = CursoPostSerializer(dataCurso,data=request.data)
         serCurso.is_valid(raise_exception=True)
+        print(dataCurso, "-----", serCurso)
         serCurso.save()
         return Response(serCurso.data)
     
@@ -127,8 +95,10 @@ class NotaDetailView(APIView):
     
     def put(self,request,id_nota , id_estudiante):
         dataNota = Nota.objects.get(pk=id_nota)
-        serNota = NotaSerializer(dataNota,data=request.data)
+        print(dataNota, request)
+        serNota = NotaPostSerializer(dataNota,data=request.data)
         serNota.is_valid(raise_exception=True)
+        eliminar_promedio_si_necesario(id_estudiante, dataNota.curso_id)
         serNota.save()
         return Response(serNota.data)
     
@@ -136,6 +106,7 @@ class NotaDetailView(APIView):
         dataNota = Nota.objects.get(pk=id_nota)
         serNota = NotaSerializer(dataNota)
         dataNota.delete()
+        eliminar_promedio_si_necesario(id_estudiante, dataNota.curso_id)
         return Response({"message": "Se elimno correctamente", "nota": serNota.data})
 
     
@@ -151,3 +122,10 @@ class PromedioView(APIView):
         dataPromedio = Promedio.objects.all()
         serPromedio = PromedioSerializer(dataPromedio,many=True)
         return Response(serPromedio.data)
+    
+
+def eliminar_promedio_si_necesario(estudiante_id, curso_id):
+    notas_restantes = Nota.objects.filter(estudiante_id=estudiante_id, curso_id=curso_id)
+    if not notas_restantes.exists():
+        # Si no hay más notas, eliminar también el objeto Promedio
+        Promedio.objects.filter(estudiante_id=estudiante_id, curso_id=curso_id).delete()
