@@ -12,4 +12,5 @@ urlpatterns = [
     path('nota/<str:id_estudiante>',views.NotasAlumView.as_view(),name='nota_estudiante'),
     path('nota/<str:id_estudiante>/<str:id_nota>',views.NotaDetailView.as_view(),name='nota_detail'),
     path('promedio',views.PromedioView.as_view(),name='promedio'),
+    path('promeEst',views.PromedioPorEstudianteView.as_view(),name='promedioPorEstudiante'),
 ]

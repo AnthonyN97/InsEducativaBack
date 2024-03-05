@@ -11,6 +11,27 @@ class Estudiante(models.Model):
         ('F', 'Femenino'),
     ]
 
+    GRADO_OPCIONES = [
+        ('1ro de primaria', 'Primero de Primaria'),
+        ('2do de primaria', 'Segundo de Primaria'),
+        ('3ro de primaria', 'Tercero de Primaria'),
+        ('4to de primaria', 'Cuarto de Primaria'),
+        ('5to de primaria', 'Quinto de Primaria'),
+        ('6to de primaria', 'Sexto de Primaria'),
+        ('1ro de secundaria', 'Primero de Secundaria'),
+        ('2do de secundaria', 'Segundo de Secundaria'),
+        ('3ro de secundaria', 'Tercero de Secundaria'),
+        ('4to de secundaria', 'Cuarto de Secundaria'),
+        ('5to de secundaria', 'Quinto de Secundaria'),
+    ]
+
+    SECCION_OPCIONES = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('D', 'D'),
+    ]
+
     TIPO_SANGRE_OPCIONES = [
         ('A+', 'A+'),
         ('A-', 'A-'),
@@ -25,6 +46,8 @@ class Estudiante(models.Model):
     nombre = models.CharField(max_length=200)
     sexo = models.CharField(max_length=1, choices=SEXO_OPCIONES, blank=True)
     fecha_nacimiento = models.DateField(default=date.today ,auto_now_add=False, auto_now=False, blank=True)
+    grado = models.CharField(max_length=20, choices=GRADO_OPCIONES, blank=True)
+    seccion = models.CharField(max_length=1, choices=SECCION_OPCIONES, blank=True)
     tipo_sangre = models.CharField(max_length=3, choices=TIPO_SANGRE_OPCIONES, blank=True)
 
     def __str__(self):

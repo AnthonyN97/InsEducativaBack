@@ -70,7 +70,7 @@ class PromedioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Promedio
-        fields = ('promedio', 'estudiante', 'curso')
+        fields = ( 'estudiante', 'curso', 'promedio',)
 
     def get_estudiante(self, obj):
         return obj.estudiante.nombre
@@ -80,3 +80,17 @@ class PromedioSerializer(serializers.ModelSerializer):
 
     def create(self,validated_data):
         return Nota.objects.create(**validated_data)
+    
+class PromedioEstSerializer(serializers.ModelSerializer):
+    promedios = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Estudiante
+        fields = ('id', 'nombre', 'promedios')
+
+    def get_promedios(self, obj):
+        nombre_estudiante = obj.nombre
+        promedios = Promedio.objects.filter(estudiante__nombre=nombre_estudiante)
+        promedios_list = [{'curso': promedio.curso.nombre, 'promedio': promedio.promedio} for promedio in promedios]
+
+        return promedios_list

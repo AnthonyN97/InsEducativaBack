@@ -123,6 +123,11 @@ class PromedioView(APIView):
         serPromedio = PromedioSerializer(dataPromedio,many=True)
         return Response(serPromedio.data)
     
+class PromedioPorEstudianteView(APIView):
+    def get(self, request):
+        dataPromedioEst = Estudiante.objects.all()
+        serPromedioEst = PromedioEstSerializer(dataPromedioEst,many=True)
+        return Response(serPromedioEst.data)
 
 def eliminar_promedio_si_necesario(estudiante_id, curso_id):
     notas_restantes = Nota.objects.filter(estudiante_id=estudiante_id, curso_id=curso_id)
