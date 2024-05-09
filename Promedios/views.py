@@ -5,7 +5,7 @@ from .models import *
 from .serializers import *
 
 class EstudianteView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         dataEstudiante = Estudiante.objects.all()
         serEstudiante = EstudianteSerializer(dataEstudiante,many=True)
@@ -18,7 +18,7 @@ class EstudianteView(APIView):
         return Response(serEstudiante.data)
     
 class EstudianteDetailView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request, id_estudiante):
         dataEstudiante = Estudiante.objects.filter(id=id_estudiante)
         serEstudiante = EstudianteSerializer(dataEstudiante,many=True)
@@ -38,7 +38,7 @@ class EstudianteDetailView(APIView):
         return Response({"message": "Se elimno correctamente", "estudiante": serEstudiante.data})
     
 class CursoView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         dataCurso = Curso.objects.all()
         serCurso = CursoSerializer(dataCurso,many=True)
@@ -52,7 +52,7 @@ class CursoView(APIView):
         return Response(serCurso.data)
     
 class CursoDetailView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request, id_curso):
         dataCurso = Curso.objects.filter(id=id_curso)
         serCurso = CursoSerializer(dataCurso,many=True)
@@ -73,9 +73,12 @@ class CursoDetailView(APIView):
         return Response({"message": "Se elimno correctamente"})
     
 class NotaView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
-        dataNota = Nota.objects.all()
+        # Obtén los cursos del usuario
+        cursos_usuario = Curso.objects.filter(users=request.user)
+        # Filtra las notas basándote en los cursos del usuario
+        dataNota = Nota.objects.filter(curso__in=cursos_usuario)
         serNota = NotaSerializer(dataNota,many=True)
         return Response(serNota.data)
     
@@ -86,7 +89,7 @@ class NotaView(APIView):
         return Response(serNota.data)
 
 class NotaDetailView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request, id_nota,id_estudiante):
         dataNota = Nota.objects.filter(id=id_nota)
         serNota = NotaSerializer(dataNota,many=True)
@@ -110,7 +113,7 @@ class NotaDetailView(APIView):
 
     
 class NotasAlumView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request, id_estudiante):
         estudiante = Estudiante.objects.get(id=id_estudiante)
         dataNota = Nota.objects.filter(estudiante=estudiante)
@@ -118,14 +121,14 @@ class NotasAlumView(APIView):
         return Response(serNota.data)
     
 class PromedioView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         dataPromedio = Promedio.objects.all()
         serPromedio = PromedioSerializer(dataPromedio,many=True)
         return Response(serPromedio.data)
     
 class PromedioPorEstudianteView(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         dataPromedioEst = Estudiante.objects.all()
         serPromedioEst = PromedioEstSerializer(dataPromedioEst,many=True)

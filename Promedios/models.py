@@ -2,6 +2,7 @@ from datetime import date
 from django.db import models
 import uuid
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import User
 
 # Create your models here.
     
@@ -55,6 +56,7 @@ class Estudiante(models.Model):
 
 class Curso(models.Model):
     nombre = models.CharField(max_length=200)
+    users = models.ManyToManyField(User, blank=True)
     estudiantes = models.ManyToManyField(Estudiante, through='Nota')
     
     def __str__(self):
