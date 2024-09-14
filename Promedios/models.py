@@ -52,7 +52,7 @@ class Estudiante(models.Model):
     tipo_sangre = models.CharField(max_length=3, choices=TIPO_SANGRE_OPCIONES, blank=True)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre + ' ' + str(self.id)
 
 class Curso(models.Model):
     nombre = models.CharField(max_length=200)

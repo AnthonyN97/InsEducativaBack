@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
+from rest_framework import status
 
 class EstudianteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -133,6 +134,46 @@ class PromedioPorEstudianteView(APIView):
         dataPromedioEst = Estudiante.objects.all()
         serPromedioEst = PromedioEstSerializer(dataPromedioEst,many=True)
         return Response(serPromedioEst.data)
+    
+class NotaPromPorPadreView(APIView):
+    def post(self, request):
+        id_estudiante = request.data.get('id_estudiante')
+        if not id_estudiante:
+            return Response({'error': 'ID del estudiante es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            uuid.UUID(id_estudiante)
+        except ValueError:
+            return Response({'error': 'ID del estudiante no es un UUID válido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            estudiante = Estudiante.objects.get(id=id_estudiante)
+            notas = Nota.objects.filter(estudiante=estudiante)
+            promedios = Promedio.objects.filter(estudiante=estudiante)
+
+            notas_data = [
+                {
+                    'curso': nota.curso.nombre,
+                    'nota': nota.nota,
+                    'porcentaje': nota.porcentaje
+                } for nota in notas
+            ]
+
+            promedios_data = [
+                {
+                    'curso': promedio.curso.nombre,
+                    'promedio': promedio.promedio
+                } for promedio in promedios
+            ]
+
+            data = {
+                'estudiante': estudiante.nombre,
+                'notas': notas_data,
+                'promedios': promedios_data
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'Estudiante no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 def eliminar_promedio_si_necesario(estudiante_id, curso_id):
     notas_restantes = Nota.objects.filter(estudiante_id=estudiante_id, curso_id=curso_id)
