@@ -67,26 +67,42 @@ class NotaPostSerializer(serializers.ModelSerializer):
 class PromedioSerializer(serializers.ModelSerializer):
     estudiante = serializers.SerializerMethodField()
     curso = serializers.SerializerMethodField()
+    grado = serializers.SerializerMethodField()
+    seccion = serializers.SerializerMethodField()
 
     class Meta:
         model = Promedio
-        fields = ( 'estudiante', 'curso', 'promedio',)
+        fields = ( 'estudiante','grado', 'seccion','curso', 'promedio',)
 
     def get_estudiante(self, obj):
         return obj.estudiante.nombre
     
     def get_curso(self, obj):
         return obj.curso.nombre
+    
+    def get_seccion(self, obj):
+        return obj.estudiante.seccion
+    
+    def get_grado(self, obj):
+        return obj.estudiante.grado
 
     def create(self,validated_data):
         return Nota.objects.create(**validated_data)
     
 class PromedioEstSerializer(serializers.ModelSerializer):
     promedios = serializers.SerializerMethodField()
+    grado = serializers.SerializerMethodField()
+    seccion = serializers.SerializerMethodField()
 
     class Meta:
         model = Estudiante
-        fields = ('id', 'nombre', 'promedios')
+        fields = ('id', 'nombre', 'grado','seccion','promedios')
+        
+    def get_seccion(self, obj):
+        return obj.seccion
+    
+    def get_grado(self, obj):
+        return obj.grado
 
     def get_promedios(self, obj):
         nombre_estudiante = obj.nombre
