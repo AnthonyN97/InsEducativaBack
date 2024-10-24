@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from .models import *
 
 class EstudianteSerializer(serializers.ModelSerializer):
@@ -55,14 +56,49 @@ class NotaSerializer(serializers.ModelSerializer):
 class NotaPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nota
-        fields = ('estudiante', 'curso' , 'nota', 'porcentaje')
+        fields = ('estudiante', 'curso', 'nota', 'porcentaje')
 
     def create(self, validated_data):
-        estudiante_id = validated_data.pop('estudiante')
-        curso_id = validated_data.pop('curso')
-        nota = validated_data.pop('nota')
-        porcentaje = validated_data.pop('porcentaje')
-        return Nota.objects.create(estudiante=estudiante_id, curso=curso_id, nota=nota, porcentaje=porcentaje, **validated_data)
+        estudiante = validated_data.pop('estudiante')
+        curso = validated_data.pop('curso')
+        
+        return Nota.objects.create(
+            estudiante=estudiante,
+            curso=curso,
+            nota=validated_data.get('nota'),
+            porcentaje=validated_data.get('porcentaje')
+        )
+        
+class NotaCreateSerializer(serializers.Serializer):
+    estudiante = serializers.CharField()
+    curso = serializers.CharField()
+    nota = serializers.FloatField()
+    porcentaje = serializers.FloatField()
+
+    def create(self, validated_data):
+        # Obtener el nombre del curso
+        curso_nombre = validated_data.pop('curso')  # Remover el campo curso para buscar el objeto
+        estudiante_nombre = validated_data.pop('estudiante')
+        # Obtener el objeto Curso usando el nombre
+        curso = get_object_or_404(Curso, nombre=curso_nombre)
+        estudiante = get_object_or_404(Estudiante, nombre=estudiante_nombre)
+        # Crear la nota usando el objeto Curso
+        nota = Nota.objects.create(estudiante=estudiante,curso=curso, **validated_data)  # Suponiendo que Nota tiene un campo 'curso'
+        return nota
+
+class MultipleNotaPostSerializer(serializers.Serializer):
+    notas = NotaCreateSerializer(many=True)
+
+    def create(self, validated_data):
+        notas_data = validated_data['notas']
+        notas = []
+
+        for nota_data in notas_data:
+            # Crear una nota usando el serializer de creación
+            nota = NotaCreateSerializer().create(nota_data)
+            notas.append(nota)
+
+        return notas  # Retornar las notas creadas
     
 class PromedioSerializer(serializers.ModelSerializer):
     estudiante = serializers.SerializerMethodField()
@@ -72,7 +108,7 @@ class PromedioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Promedio
-        fields = ( 'estudiante','grado', 'seccion','curso', 'promedio',)
+        fields = ( 'estudiante','grado', 'seccion','curso', 'promedio')
 
     def get_estudiante(self, obj):
         return obj.estudiante.nombre

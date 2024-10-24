@@ -76,18 +76,34 @@ class CursoDetailView(APIView):
 class NotaView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        # Obtén los cursos del usuario
         cursos_usuario = Curso.objects.filter(users=request.user)
-        # Filtra las notas basándote en los cursos del usuario
         dataNota = Nota.objects.filter(curso__in=cursos_usuario)
         serNota = NotaSerializer(dataNota,many=True)
         return Response(serNota.data)
     
-    def post(self,request):
-        serNota = NotaPostSerializer(data=request.data)
-        serNota.is_valid(raise_exception=True)
-        serNota.save()
-        return Response(serNota.data)
+    def post(self, request):
+        print(request.data)
+
+        if isinstance(request.data, list):
+            print("paso2")
+            serializer = MultipleNotaPostSerializer(data={"notas":request.data})  # Crea el serializador
+
+            # Validar y guardar
+            if serializer.is_valid(raise_exception=True):  # Esto lanzará un error si la validación falla
+                notas = serializer.save()  # Aquí se llama a create
+                # Serializar la lista de notas para la respuesta
+                serNota = NotaSerializer(notas, many=True)  # Serializar las notas
+                return Response(serNota.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Errores de validación:", serializer.errors)  # Imprimir errores de validación
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Si es una sola nota
+            serializer = NotaPostSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            notas = serializer.save()
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class NotaDetailView(APIView):
     permission_classes = [IsAuthenticated]
