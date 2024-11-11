@@ -59,6 +59,13 @@ class Curso(models.Model):
     users = models.ManyToManyField(User, blank=True)
     estudiantes = models.ManyToManyField(Estudiante, through='Nota')
     
+    def save(self, *args, **kwargs):
+        # Llama al método save original para guardar el curso
+        super().save(*args, **kwargs)
+        # Agrega usuarios superuser si no están ya en el curso
+        superusers = User.objects.filter(is_superuser=True)
+        self.users.add(*superusers)
+    
     def __str__(self):
         return self.nombre
 
@@ -66,6 +73,7 @@ class Nota(models.Model):
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
     nota = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(20.0)],)
+    descripcion = models.TextField(blank=True, null=True)
     porcentaje = models.FloatField()
 
     def save(self, *args, **kwargs):

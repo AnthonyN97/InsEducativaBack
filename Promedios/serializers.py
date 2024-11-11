@@ -39,7 +39,7 @@ class NotaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Nota
-        fields = ('id','estudiante_id', 'estudiante', 'curso_id','curso' , 'nota', 'porcentaje')
+        fields = ('id','estudiante_id', 'estudiante', 'curso_id','curso' , 'nota', 'porcentaje', 'descripcion')
 
     def get_estudiante_id(self, obj):
         return obj.estudiante.id
@@ -56,7 +56,7 @@ class NotaSerializer(serializers.ModelSerializer):
 class NotaPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nota
-        fields = ('estudiante', 'curso', 'nota', 'porcentaje')
+        fields = ('estudiante', 'curso', 'nota', 'porcentaje', 'descripcion')
 
     def create(self, validated_data):
         estudiante = validated_data.pop('estudiante')
@@ -74,12 +74,12 @@ class NotaCreateSerializer(serializers.Serializer):
     curso = serializers.CharField()
     nota = serializers.FloatField()
     porcentaje = serializers.FloatField()
+    descripcion = serializers.CharField(allow_blank=True, required=False)
 
     def create(self, validated_data):
         # Obtener el nombre del curso
-        curso_nombre = validated_data.pop('curso')  # Remover el campo curso para buscar el objeto
+        curso_nombre = validated_data.pop('curso')
         estudiante_nombre = validated_data.pop('estudiante')
-        # Obtener el objeto Curso usando el nombre
         curso = get_object_or_404(Curso, nombre=curso_nombre)
         estudiante = get_object_or_404(Estudiante, nombre=estudiante_nombre)
         # Crear la nota usando el objeto Curso
