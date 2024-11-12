@@ -4,5 +4,5 @@ class WebsiteUser(HttpUser):
     @task
     def post_notaPromId(self):
         self.client.post("/notaPromId", json={
-            "id_estudiante": "f629bae1-8df1-460a-bcbe-29ba8418f5c1"
+            "id_estudiante": "6f920817-91ad-4dc4-933e-25a3975071c0"
         })

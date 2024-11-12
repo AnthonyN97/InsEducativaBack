@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
 from rest_framework import status
+import psutil
+import os
 
 class EstudianteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -151,6 +153,11 @@ class PromedioPorEstudianteView(APIView):
         serPromedioEst = PromedioEstSerializer(dataPromedioEst,many=True)
         return Response(serPromedioEst.data)
     
+def log_memory_usage():
+    process = psutil.Process(os.getpid())
+    memory_usage = process.memory_info().rss / 1024 / 1024 / 1024  # Convertir a GB
+    print(f"Uso de memoria: {memory_usage:.4f} GB")
+
 class NotaPromPorPadreView(APIView):
     def post(self, request):
         id_estudiante = request.data.get('id_estudiante')
@@ -160,34 +167,23 @@ class NotaPromPorPadreView(APIView):
             uuid.UUID(id_estudiante)
         except ValueError:
             return Response({'error': 'ID del estudiante no es un UUID válido'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             estudiante = Estudiante.objects.get(id=id_estudiante)
-            notas = Nota.objects.filter(estudiante=estudiante)
-            promedios = Promedio.objects.filter(estudiante=estudiante)
+            # Optimización: usar select_related y values para obtener solo los datos necesarios
+            notas = Nota.objects.filter(estudiante=estudiante).select_related('curso').values('curso__nombre', 'nota', 'porcentaje')
+            promedios = Promedio.objects.filter(estudiante=estudiante).select_related('curso').values('curso__nombre', 'promedio')
 
-            notas_data = [
-                {
-                    'curso': nota.curso.nombre,
-                    'nota': nota.nota,
-                    'porcentaje': nota.porcentaje
-                } for nota in notas
-            ]
-
-            promedios_data = [
-                {
-                    'curso': promedio.curso.nombre,
-                    'promedio': promedio.promedio
-                } for promedio in promedios
-            ]
-
+            # Construcción directa de datos, sin listas intermedias
             data = {
                 'estudiante': estudiante.nombre,
-                'notas': notas_data,
-                'promedios': promedios_data
+                'notas': list(notas),
+                'promedios': list(promedios)
             }
 
+            log_memory_usage()  # Registrar el uso de memoria después de generar el objeto de respuesta
             return Response(data, status=status.HTTP_200_OK)
+        
         except Estudiante.DoesNotExist:
             return Response({'error': 'Estudiante no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
