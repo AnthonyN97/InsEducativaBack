@@ -7,17 +7,24 @@ from rest_framework import status
 import psutil
 import os
 
+def log_memory_usage():
+    process = psutil.Process(os.getpid())
+    memory_usage = process.memory_info().rss / 1024 / 1024 / 1024  # Convertir a GB
+    print(f"Uso de memoria: {memory_usage:.4f} GB")
+
 class EstudianteView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         dataEstudiante = Estudiante.objects.all()
         serEstudiante = EstudianteSerializer(dataEstudiante,many=True)
+        log_memory_usage()
         return Response(serEstudiante.data)
     
     def post(self,request):
         serEstudiante = EstudianteSerializer(data=request.data)
         serEstudiante.is_valid(raise_exception=True)
         serEstudiante.save()
+        log_memory_usage()
         return Response(serEstudiante.data)
     
 class EstudianteDetailView(APIView):
@@ -25,6 +32,7 @@ class EstudianteDetailView(APIView):
     def get(self, request, id_estudiante):
         dataEstudiante = Estudiante.objects.filter(id=id_estudiante)
         serEstudiante = EstudianteSerializer(dataEstudiante,many=True)
+        log_memory_usage()
         return Response(serEstudiante.data)
     
     def put(self,request,id_estudiante):
@@ -32,12 +40,14 @@ class EstudianteDetailView(APIView):
         serEstudiante = EstudianteSerializer(dataEstudiante,data=request.data)
         serEstudiante.is_valid(raise_exception=True)
         serEstudiante.save()
+        log_memory_usage()
         return Response(serEstudiante.data)
     
     def delete(self,request,id_estudiante):
         dataEstudiante = Estudiante.objects.get(pk=id_estudiante)
         serEstudiante = EstudianteSerializer(dataEstudiante)
         dataEstudiante.delete()
+        log_memory_usage()
         return Response({"message": "Se elimno correctamente", "estudiante": serEstudiante.data})
     
 class CursoView(APIView):
@@ -45,6 +55,7 @@ class CursoView(APIView):
     def get(self, request):
         dataCurso = Curso.objects.all()
         serCurso = CursoSerializer(dataCurso,many=True)
+        log_memory_usage()
         return Response(serCurso.data)
     
     def post(self,request):
@@ -52,6 +63,7 @@ class CursoView(APIView):
         serCurso = CursoPostSerializer(data=request.data)
         serCurso.is_valid(raise_exception=True)
         serCurso.save()
+        log_memory_usage()
         return Response(serCurso.data)
     
 class CursoDetailView(APIView):
@@ -59,6 +71,7 @@ class CursoDetailView(APIView):
     def get(self, request, id_curso):
         dataCurso = Curso.objects.filter(id=id_curso)
         serCurso = CursoSerializer(dataCurso,many=True)
+        log_memory_usage()
         return Response(serCurso.data)
     
     def put(self,request,id_curso):
@@ -67,12 +80,14 @@ class CursoDetailView(APIView):
         serCurso.is_valid(raise_exception=True)
         print(dataCurso, "-----", serCurso)
         serCurso.save()
+        log_memory_usage()
         return Response(serCurso.data)
     
     def delete(self,request,id_curso):
         dataCurso = Curso.objects.get(pk=id_curso)
         serCurso = CursoSerializer(dataCurso)
         dataCurso.delete()
+        log_memory_usage()
         return Response({"message": "Se elimno correctamente"})
     
 class NotaView(APIView):
@@ -81,6 +96,7 @@ class NotaView(APIView):
         cursos_usuario = Curso.objects.filter(users=request.user)
         dataNota = Nota.objects.filter(curso__in=cursos_usuario)
         serNota = NotaSerializer(dataNota,many=True)
+        log_memory_usage()
         return Response(serNota.data)
     
     def post(self, request):
@@ -95,6 +111,7 @@ class NotaView(APIView):
                 notas = serializer.save()  # Aquí se llama a create
                 # Serializar la lista de notas para la respuesta
                 serNota = NotaSerializer(notas, many=True)  # Serializar las notas
+                log_memory_usage()
                 return Response(serNota.data, status=status.HTTP_201_CREATED)
             else:
                 print("Errores de validación:", serializer.errors)  # Imprimir errores de validación
@@ -104,7 +121,7 @@ class NotaView(APIView):
             serializer = NotaPostSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             notas = serializer.save()
-        
+        log_memory_usage()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class NotaDetailView(APIView):
@@ -112,6 +129,7 @@ class NotaDetailView(APIView):
     def get(self, request, id_nota,id_estudiante):
         dataNota = Nota.objects.filter(id=id_nota)
         serNota = NotaSerializer(dataNota,many=True)
+        log_memory_usage()
         return Response(serNota.data)
     
     def put(self,request,id_nota , id_estudiante):
@@ -121,6 +139,7 @@ class NotaDetailView(APIView):
         serNota.is_valid(raise_exception=True)
         eliminar_promedio_si_necesario(id_estudiante, dataNota.curso_id)
         serNota.save()
+        log_memory_usage()
         return Response(serNota.data)
     
     def delete(self,request,id_nota, id_estudiante):
@@ -128,6 +147,7 @@ class NotaDetailView(APIView):
         serNota = NotaSerializer(dataNota)
         dataNota.delete()
         eliminar_promedio_si_necesario(id_estudiante, dataNota.curso_id)
+        log_memory_usage()
         return Response({"message": "Se elimno correctamente", "nota": serNota.data})
 
     
@@ -137,6 +157,7 @@ class NotasAlumView(APIView):
         estudiante = Estudiante.objects.get(id=id_estudiante)
         dataNota = Nota.objects.filter(estudiante=estudiante)
         serNota = NotaSerializer(dataNota,many=True)
+        log_memory_usage()
         return Response(serNota.data)
     
 class PromedioView(APIView):
@@ -144,6 +165,7 @@ class PromedioView(APIView):
     def get(self, request):
         dataPromedio = Promedio.objects.all()
         serPromedio = PromedioSerializer(dataPromedio,many=True)
+        log_memory_usage()
         return Response(serPromedio.data)
     
 class PromedioPorEstudianteView(APIView):
@@ -151,12 +173,8 @@ class PromedioPorEstudianteView(APIView):
     def get(self, request):
         dataPromedioEst = Estudiante.objects.all()
         serPromedioEst = PromedioEstSerializer(dataPromedioEst,many=True)
+        log_memory_usage()
         return Response(serPromedioEst.data)
-    
-def log_memory_usage():
-    process = psutil.Process(os.getpid())
-    memory_usage = process.memory_info().rss / 1024 / 1024 / 1024  # Convertir a GB
-    print(f"Uso de memoria: {memory_usage:.4f} GB")
 
 class NotaPromPorPadreView(APIView):
     def post(self, request):
